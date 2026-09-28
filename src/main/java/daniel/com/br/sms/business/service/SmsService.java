@@ -10,6 +10,7 @@ import daniel.com.br.sms.infrastructure.repositories.SmsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ public class SmsService {
 
     private final SmsRepository repository;
     private final Converter converter;
+    private final Clock clock;
 
 
 
@@ -33,7 +35,7 @@ public class SmsService {
     }
 
     public List<SmsResponseDTO> gerarRelatorio (StatusEnvioEnum statusEnvioEnum) {
-        LocalDateTime dataHoraLimite = LocalDateTime.now().minusHours(24);
+        LocalDateTime dataHoraLimite = LocalDateTime.now(clock).minusHours(24);
 
         List<SmsMensagemEntity> entity = repository.findByStatusEnvioAndDataEnvioAfter(statusEnvioEnum, dataHoraLimite);
 

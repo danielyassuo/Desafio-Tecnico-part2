@@ -28,7 +28,7 @@ public class SmsController {
     @ApiResponse(responseCode = "200", description = "mensagem alterada com sucesso")
     @ApiResponse(responseCode = "404", description = "Id de mensagem não encontrada")
     @ApiResponse(responseCode = "500", description = "Erro no Servidor")
-    public ResponseEntity<SmsResponseDTO> alterarStatusMensagem (@RequestBody Long id, @RequestBody StatusEnvioEnum statusEnvioEnum){
+    public ResponseEntity<SmsResponseDTO> alterarStatusMensagem (@RequestParam Long id, @RequestParam StatusEnvioEnum statusEnvioEnum){
         return ResponseEntity.ok(service.alteraStatusSms(id, statusEnvioEnum));
     }
 
@@ -37,7 +37,7 @@ public class SmsController {
     @ApiResponse(responseCode = "200", description = "Mensagens encontradas e relatório gerado com sucesso")
     @ApiResponse(responseCode = "401", description = "status inválido")
     @ApiResponse(responseCode = "500", description = "Erro no servidor")
-    public ResponseEntity<List<SmsResponseDTO>> gerarRelatorioSms(@RequestBody StatusEnvioEnum statusEnvioEnum){
+    public ResponseEntity<List<SmsResponseDTO>> gerarRelatorioSms(@RequestParam StatusEnvioEnum statusEnvioEnum){
         return ResponseEntity.ok(service.gerarRelatorio(statusEnvioEnum));
     }
 
