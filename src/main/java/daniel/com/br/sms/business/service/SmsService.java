@@ -1,8 +1,10 @@
 package daniel.com.br.sms.business.service;
 
 
+import daniel.com.br.sms.api.dto.request.SmsRequestDTO;
 import daniel.com.br.sms.api.dto.response.SmsResponseDTO;
 import daniel.com.br.sms.business.converter.Converter;
+import daniel.com.br.sms.business.converter.SmsUpdateConverter;
 import daniel.com.br.sms.infrastructure.entities.SmsMensagemEntity;
 import daniel.com.br.sms.infrastructure.enums.StatusEnvioEnum;
 import daniel.com.br.sms.infrastructure.exceptions.ResourcesNotFoundExceptions;
@@ -21,7 +23,28 @@ public class SmsService {
 
     private final SmsRepository repository;
     private final Converter converter;
+    private final SmsUpdateConverter updateConverter;
     private final Clock clock;
+
+
+    public SmsResponseDTO salvarMensagemSms (SmsRequestDTO smsRequestDTO) {
+        SmsMensagemEntity entity = converter.paraEntity(smsRequestDTO);
+
+        return converter.paraDTO(repository.save(entity));
+    }
+
+    public void deletaSms (Long id){
+        repository.findById(id).orElseThrow(() -> new ResourcesNotFoundExceptions("ID não encontrado " + id));
+        repository.deleteById(id);
+    }
+
+    public SmsResponseDTO alterarDadosSms (Long id, SmsRequestDTO smsRequestDTO){
+        SmsMensagemEntity entity = repository.findById(id).orElseThrow(() -> new ResourcesNotFoundExceptions("ID não encontrado " +id));
+
+        SmsMensagemEntity sms = updateConverter.updateSms(smsRequestDTO, entity);
+
+        return converter.paraDTO(repository.save(sms));
+    }
 
 
 
