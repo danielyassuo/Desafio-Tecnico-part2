@@ -24,8 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -122,6 +121,50 @@ public class SmsControllerTest {
 
         json = objectMapper.writeValueAsString(smsRequestDTO);
     }
+
+    @Test
+    void deveSalvarMensagemSms () throws Exception {
+        when(service.salvarMensagemSms(smsRequestDTO)).thenReturn(smsResponseDTO);
+
+        mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json)
+        ).andExpect(status().isOk());
+
+        verify(service).salvarMensagemSms(smsRequestDTO);
+        verifyNoMoreInteractions(service);
+    }
+
+    @Test
+    void deveDeletarSms () throws Exception {
+        doNothing().when(service).deletaSms(smsRequestDTO.getId());
+
+        mockMvc.perform(delete(url+"/deletar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .param("id", String.valueOf(smsRequestDTO.getId()))
+        ).andExpect(status().isOk());
+        verify(service).deletaSms(smsRequestDTO.getId());
+        verifyNoMoreInteractions(service);
+    }
+
+    @Test
+    void deveAtualizarDadosSms () throws Exception {
+        when(service.alterarDadosSms(smsRequestDTO.getId(), smsRequestDTO)).thenReturn(smsResponseDTO);
+
+        mockMvc.perform(put(url+"/atualizar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .param("id", String.valueOf(smsRequestDTO.getId()))
+                .content(json)
+        ).andExpect(status().isOk());
+
+        verify(service).alterarDadosSms(smsRequestDTO.getId(), smsRequestDTO);
+        verifyNoMoreInteractions(service);
+    }
+
+
 
     @Test
     void deveAlterarStatusMensagem () throws Exception {
