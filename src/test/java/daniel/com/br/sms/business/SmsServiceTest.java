@@ -4,6 +4,7 @@ package daniel.com.br.sms.business;
 import daniel.com.br.sms.api.dto.request.SmsRequestDTO;
 import daniel.com.br.sms.api.dto.response.SmsResponseDTO;
 import daniel.com.br.sms.business.converter.Converter;
+import daniel.com.br.sms.business.converter.SmsUpdateConverter;
 import daniel.com.br.sms.business.service.SmsService;
 import daniel.com.br.sms.infrastructure.entities.SmsMensagemEntity;
 import daniel.com.br.sms.infrastructure.enums.StatusEnvioEnum;
@@ -12,8 +13,10 @@ import daniel.com.br.sms.infrastructure.repositories.SmsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
@@ -26,6 +29,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,12 +44,16 @@ public class SmsServiceTest {
     @Mock
     Clock clock;
 
+    @Spy
+    SmsUpdateConverter updateConverter = Mappers.getMapper(SmsUpdateConverter.class);
+
 
     @Mock
     ResourcesNotFoundExceptions resourcesNotFoundExceptions;
 
     @Mock
     Converter converter;
+
 
     Instant agora;
 
@@ -93,6 +101,42 @@ public class SmsServiceTest {
 
         listaEntidade = List.of(smsMensagemEntity);
         listaResponse = List.of(smsResponseDTO);
+    }
+
+
+    @Test
+    void deveSalvarSms () {
+        when(converter.paraEntity(smsRequestDTO)).thenReturn(smsMensagemEntity);
+        when(repository.save(smsMensagemEntity)).thenReturn(smsMensagemEntity);
+        when(converter.paraDTO(smsMensagemEntity)).thenReturn(smsResponseDTO);
+
+        SmsResponseDTO resultado = service.salvarMensagemSms(smsRequestDTO);
+
+        assertEquals(smsResponseDTO, resultado);
+    }
+
+    @Test
+    void deveDeletarSms () {
+        when(repository.findById(smsRequestDTO.getId())).thenReturn(Optional.of(smsMensagemEntity));
+        service.deletaSms(smsMensagemEntity.getId());
+
+        verify(repository).deleteById(smsMensagemEntity.getId());
+    }
+
+
+    @Test
+    void deveAtualizarSms () {
+        when(repository.findById(smsRequestDTO.getId())).thenReturn(Optional.of(smsMensagemEntity));
+        SmsMensagemEntity smsAtualizado = updateConverter.updateSms(smsRequestDTO, smsMensagemEntity);
+        when(updateConverter.updateSms(smsRequestDTO, smsMensagemEntity)).thenReturn(smsAtualizado);
+        when(repository.save(smsAtualizado)).thenReturn(smsAtualizado);
+        when(converter.paraDTO(smsAtualizado)).thenReturn(smsResponseDTO);
+        SmsResponseDTO resultado = service.alterarDadosSms(smsRequestDTO.getId(), smsRequestDTO);
+
+
+
+        assertEquals(smsResponseDTO, resultado);
+
     }
 
     @Test
